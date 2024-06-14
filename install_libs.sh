@@ -39,7 +39,9 @@ build_netcdf() {
     NETCDF_SRC=netcdf-c
     NETCDF_BLD=netcdf-build
 
-    git clone ${netcdf_url} -b ${NETCDF_VERSION} ${NETCDF_SRC}
+    # We are building from lastest b/c # it has fix for setting CURL path to find SSL certificates.
+    git clone https://github.com/Unidata/netcdf-c ${NETCDF_SRC}
+    # git clone ${netcdf_url} -b ${NETCDF_VERSION} ${NETCDF_SRC}
 
     cmake ${NETCDF_SRC} -B ${NETCDF_BLD} \
         -DENABLE_NETCDF4=on \
