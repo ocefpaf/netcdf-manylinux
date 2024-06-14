@@ -1,9 +1,10 @@
 FROM quay.io/pypa/manylinux2014_aarch64
 
+# Fix the hash in the URL and update this.
+ENV AEC_VERSION 1.0.6
 ENV HDF5_VERSION 1.14.2
+ENV NETCDF_VERSION v4.9.2
 ENV HDF5_DIR /usr/local
 
-COPY install_libaec.sh /tmp/install_libaec.sh
-RUN bash /tmp/install_libaec.sh
-COPY install_hdf5.sh /tmp/install_hdf5.sh
-RUN bash /tmp/install_hdf5.sh
+COPY install_libs.sh /tmp/install_libs.sh
+RUN bash /tmp/install_libs.sh
