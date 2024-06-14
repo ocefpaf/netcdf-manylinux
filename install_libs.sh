@@ -46,6 +46,7 @@ build_netcdf() {
     cmake ${NETCDF_SRC} -B ${NETCDF_BLD} \
         -DENABLE_NETCDF4=on \
         -DENABLE_HDF5=on \
+        -DCMAKE_INSTALL_LIBDIR=lib \
         -DENABLE_DAP=on \
         -DENABLE_TESTS=off \
         -DENABLE_PLUGIN_INSTALL=off \
