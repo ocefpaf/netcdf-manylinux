@@ -7,5 +7,7 @@ ENV NETCDF_VERSION 4.9.3-dev
 ENV OPENSSL_VERSION 3.3.1
 ENV CURL_VERSION 8.8.0
 
+ENV BUILD_PREFIX /usr/local
+
 COPY install_libs.sh /tmp/install_libs.sh
 RUN bash /tmp/install_libs.sh
