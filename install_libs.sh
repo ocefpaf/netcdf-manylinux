@@ -82,7 +82,7 @@ clean_up(){
   # Clean up to reduce the size of the Docker image.
   echo "Cleaning up unnecessary files"
   rm -rf hdf5-${HDF5_VERSION} libaec-${AEC_VERSION} libaec-${AEC_VERSION}.tar.gz hdf5-${HDF5_VERSION}.tar.gz
-  rm -rf netcdf-c-${NETCDF_VERSION}
+  rm -rf netcdf-c-${NETCDF_SRC}
   
   yum -y erase wget zlib-devel perl-IPC-Cmd
 }
@@ -93,5 +93,5 @@ build_curl
 build_libaec
 build_hdf5
 build_netcdf
-clean_up
+# clean_up
 popd
