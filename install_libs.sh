@@ -21,8 +21,8 @@ build_hdf5() {
     # This seems to be needed to find libsz.so.2
     ldconfig
 
-    #                                    Remove trailing .*, to get e.g. '1.12' ↓
-    wget "https://www.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_VERSION%.*}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz"
+    #                           Remove trailing .*, to get e.g. 'major.minor' ↓
+    wget "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_VERSION%.*}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz"
     tar -xzvf hdf5-${HDF5_VERSION}.tar.gz
     pushd hdf5-${HDF5_VERSION}
       chmod u+x autogen.sh
@@ -96,6 +96,6 @@ build_openssl
 build_curl
 build_libaec
 build_hdf5
-build_netcdf
-clean_up
+# build_netcdf
+# clean_up
 popd
