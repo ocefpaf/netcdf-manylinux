@@ -96,6 +96,6 @@ build_openssl
 build_curl
 build_libaec
 build_hdf5
-# build_netcdf
-# clean_up
+build_netcdf
+clean_up
 popd
