@@ -1,4 +1,4 @@
-FROM quay.io/pypa/manylinux2014_aarch64
+FROM quay.io/pypa/manylinux_2_28_x86_64
 
 # Fix the hash in the URL and update this.
 ENV AEC_VERSION 1.0.6

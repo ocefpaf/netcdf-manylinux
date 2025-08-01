@@ -5,5 +5,5 @@ This image was built on top of the https://github.com/h5py/hdf5-manylinux images
 
 Images are published on GitHub container registry:
 
-- [manylinux2014_x86_64-netcdf](https://github.com/orgs/ocefpaf/packages/container/package/manylinux2014_x86_64-netcdf).
-- [manylinux2014_aarch64-netcdf](https://github.com/orgs/ocefpaf/packages/container/package/manylinux2014_aarch64-netcdf).
+- [manylinux_2_28_x86_64-netcdf](https://github.com/orgs/ocefpaf/packages/container/package/manylinux2014_x86_64-netcdf).
+- [manylinux_2_28_aarch64-netcdf](https://github.com/orgs/ocefpaf/packages/container/package/manylinux2014_aarch64-netcdf).
