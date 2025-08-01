@@ -1,7 +1,9 @@
 set -euo pipefail
 
+# We build curl + openssl from source due to https://github.com/Unidata/netcdf4-python/issues/1179
+# yum -y curl-devel
+
 # perl is needed for openssl
-# yum -y install wget zlib-devel curl-devel
 yum -y install wget zlib-devel perl-IPC-Cmd
 
 build_openssl() {
@@ -58,26 +60,26 @@ build_hdf5() {
 }
 
 build_netcdf() {
-    netcdf_url=https://github.com/Unidata/netcdf-c
     NETCDF_SRC=netcdf-c
     NETCDF_BLD=netcdf-build
 
-    # We are building from test b/c # it has fix for setting CURL path to find SSL certificates.
-    git clone https://github.com/Unidata/netcdf-c ${NETCDF_SRC}
-    # git clone ${netcdf_url} -b ${NETCDF_VERSION} ${NETCDF_SRC}
+    wget https://github.com/Unidata/netcdf-c/archive/refs/tags/v${NETCDF_VERSION}.tar.gz
+    tar -xzvf v${NETCDF_VERSION}.tar.gz
+    pushd v${NETCDF_VERSION}.tar.gz
 
-    cmake ${NETCDF_SRC} -B ${NETCDF_BLD} \
-        -DENABLE_NETCDF4=on \
-        -DENABLE_HDF5=on \
-        -DCMAKE_INSTALL_LIBDIR=lib \
-        -DENABLE_DAP=on \
-        -DENABLE_TESTS=off \
-        -DENABLE_PLUGIN_INSTALL=off \
-        -DBUILD_SHARED_LIBS=on \
-        -DCMAKE_BUILD_TYPE=Release
+      cmake ${NETCDF_SRC} -B ${NETCDF_BLD} \
+          -DENABLE_NETCDF4=on \
+          -DENABLE_HDF5=on \
+          -DCMAKE_INSTALL_LIBDIR=lib \
+          -DENABLE_DAP=on \
+          -DENABLE_TESTS=off \
+          -DENABLE_PLUGIN_INSTALL=off \
+          -DBUILD_SHARED_LIBS=on \
+          -DCMAKE_BUILD_TYPE=Release
 
-    cmake --build ${NETCDF_BLD} \
-        --target install
+      cmake --build ${NETCDF_BLD} \
+          --target install
+     popd
 }
 
 clean_up(){
