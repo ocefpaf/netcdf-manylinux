@@ -60,12 +60,11 @@ build_hdf5() {
 }
 
 build_netcdf() {
-    NETCDF_SRC=netcdf-c
+    NETCDF_SRC=netcdf-c-${NETCDF_VERSION}
     NETCDF_BLD=netcdf-build
 
     wget https://github.com/Unidata/netcdf-c/archive/refs/tags/v${NETCDF_VERSION}.tar.gz
     tar -xzvf v${NETCDF_VERSION}.tar.gz
-    pushd v${NETCDF_VERSION}.tar.gz
 
       cmake ${NETCDF_SRC} -B ${NETCDF_BLD} \
           -DENABLE_NETCDF4=on \
@@ -79,7 +78,6 @@ build_netcdf() {
 
       cmake --build ${NETCDF_BLD} \
           --target install
-     popd
 }
 
 clean_up(){
