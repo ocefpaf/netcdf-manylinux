@@ -4,7 +4,7 @@ set -euo pipefail
 # yum -y curl-devel
 
 # perl is needed for openssl
-yum -y install wget zlib-devel perl-IPC-Cmd
+yum -y install wget zlib-devel perl-IPC-Cmd bzip2-devel
 
 build_openssl() {
     wget https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz
@@ -41,6 +41,38 @@ build_libaec(){
     popd
 }
 
+build_zstd(){
+    wget https://github.com/facebook/zstd/releases/download/v${ZSTD_VERSION}/zstd-${ZSTD_VERSION}.tar.gz
+    tar zxf zstd-${ZSTD_VERSION}.tar.gz
+
+    echo "Building & installing zstd"
+    pushd zstd-${ZSTD_VERSION}
+      make install PREFIX=${BUILD_PREFIX}
+    popd
+}
+
+build_blosc() {
+    # c-blosc
+    wget https://github.com/Blosc/c-blosc/archive/refs/tags/v$BLOSC_VERSION.tar.gz -O c-blosc-$BLOSC_VERSION.tar.gz
+    tar -xzvf c-blosc-$BLOSC_VERSION.tar.gz
+
+    echo "Building & installing c-blosc"
+    pushd c-blosc-$BLOSC_VERSION
+      mkdir build
+      cd build
+
+      #  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 to bypass incompatibility with cmake v4
+      # until https://github.com/Blosc/c-blosc/issues/394 is closed.
+      cmake .. -DCMAKE_INSTALL_PREFIX=${BUILD_PREFIX} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DPREFER_EXTERNAL_ZSTD=ON
+
+      make -j$(nproc)
+      make install
+
+      # symlink so that "auditwheel repair" finds the shared library in its default search paths
+      ln -s /usr/local/lib64/libblosc.so.$BLOSC_VERSION /usr/local/lib/libblosc.so.1
+    popd
+}
+
 build_hdf5() {
     # This seems to be needed to find libsz.so.2
     ldconfig
@@ -57,6 +89,9 @@ build_hdf5() {
       make -j$(nproc)
       make install
     popd
+
+    # Needed by h5ls to find libhdf5.so.310
+    ldconfig
 }
 
 build_netcdf() {
@@ -68,11 +103,11 @@ build_netcdf() {
 
       cmake ${NETCDF_SRC} -B ${NETCDF_BLD} \
           -DENABLE_NETCDF4=on \
-          -DENABLE_HDF5=on \
+          -DNETCDF_ENABLE_HDF5=on \
           -DCMAKE_INSTALL_LIBDIR=lib \
-          -DENABLE_DAP=on \
-          -DENABLE_TESTS=off \
-          -DENABLE_PLUGIN_INSTALL=off \
+          -DNETCDF_ENABLE_DAP=on \
+          -DNETCDF_ENABLE_TESTS=off \
+          -DENABLE_PLUGIN_INSTALL=yes \
           -DBUILD_SHARED_LIBS=on \
           -DCMAKE_BUILD_TYPE=Release
 
@@ -85,8 +120,12 @@ clean_up(){
   echo "Cleaning up unnecessary files"
   rm -rf hdf5-${HDF5_VERSION} \
          libaec-${AEC_VERSION} \
+         c-blosc-$BLOSC_VERSION \
+         zstd-${ZSTD_VERSION} \
          hdf5-${HDF5_VERSION}.tar.gz \
          libaec-${AEC_VERSION}.tar.gz \
+         c-blosc-$BLOSC_VERSION.tar.gz \
+         zstd-${ZSTD_VERSION}.tar.gz \
          ${NETCDF_SRC}
 
   # Can't execute this with our own curl in the path.
@@ -97,6 +136,8 @@ pushd /tmp
 build_openssl
 build_curl
 build_libaec
+build_zstd
+build_blosc
 build_hdf5
 build_netcdf
 clean_up
