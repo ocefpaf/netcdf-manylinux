@@ -8,7 +8,7 @@ yum -y install wget zlib-devel perl-IPC-Cmd bzip2-devel
 
 build_openssl() {
     wget https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz
-    tar -xzvf openssl-${OPENSSL_VERSION}.tar.gz
+    tar zxf openssl-${OPENSSL_VERSION}.tar.gz
 
     pushd openssl-${OPENSSL_VERSION}
       ./config shared -fPIC shared --prefix=${BUILD_PREFIX} --libdir=lib
@@ -20,7 +20,7 @@ build_openssl() {
 build_curl() {
     flags="--prefix=${BUILD_PREFIX} --disable-ldap --with-openssl=${BUILD_PREFIX} --without-zstd --without-libpsl"
     wget https://curl.haxx.se/download/curl-${CURL_VERSION}.tar.gz
-    tar -xzvf curl-${CURL_VERSION}.tar.gz
+    tar zxf curl-${CURL_VERSION}.tar.gz
     pushd curl-${CURL_VERSION}
       ./configure ${flags}
       make -j$(nproc)
@@ -30,14 +30,18 @@ build_curl() {
 
 build_libaec(){
     # The URL includes a hash, so it needs to change if the version does
-    wget  https://gitlab.dkrz.de/-/project/117/uploads/dc5fc087b645866c14fa22320d91fb27/libaec-${AEC_VERSION}.tar.gz
-    tar zxf libaec-${AEC_VERSION}.tar.gz
+    wget https://gitlab.dkrz.de/k202009/libaec/-/archive/v${AEC_VERSION}/libaec-v${AEC_VERSION}.tar.gz
+    tar zxf libaec-v${AEC_VERSION}.tar.gz
 
     echo "Building & installing libaec"
-    pushd libaec-${AEC_VERSION}
-      ./configure
-      make -j$(nproc)
-      make install
+    pushd libaec-v${AEC_VERSION}
+      mkdir build
+      cmake -S . -B build \
+          -D CMAKE_BUILD_TYPE=Release \
+          -D BUILD_STATIC_LIBS=OFF \
+          -D BUILD_TESTING=OFF
+      make -C build -j "$(nproc)"
+      make -C build install
     popd
 }
 
@@ -54,7 +58,7 @@ build_zstd(){
 build_blosc() {
     # c-blosc
     wget https://github.com/Blosc/c-blosc/archive/refs/tags/v$BLOSC_VERSION.tar.gz -O c-blosc-$BLOSC_VERSION.tar.gz
-    tar -xzvf c-blosc-$BLOSC_VERSION.tar.gz
+    tar zxf c-blosc-$BLOSC_VERSION.tar.gz
 
     echo "Building & installing c-blosc"
     pushd c-blosc-$BLOSC_VERSION
@@ -80,14 +84,24 @@ build_hdf5() {
     #                           Remove trailing .*, to get e.g. 'major.minor' ↓
     HDF5_TAG="hdf5_${HDF5_VERSION}"
     wget "https://github.com/HDFGroup/hdf5/archive/refs/tags/${HDF5_TAG}.tar.gz"
-    tar -xzvf hdf5_${HDF5_VERSION}.tar.gz
+    tar zxf hdf5_${HDF5_VERSION}.tar.gz
     pushd hdf5-${HDF5_TAG}
-      chmod u+x autogen.sh
-
       echo "Configuring, building & installing HDF5 ${HDF5_VERSION} to ${BUILD_PREFIX}"
-      ./configure --prefix ${BUILD_PREFIX} --enable-build-mode=production --with-szlib
-      make -j$(nproc)
-      make install
+      mkdir build
+      cmake -S . -B build \
+          -D CMAKE_BUILD_TYPE=Release \
+          -D CMAKE_INSTALL_PREFIX="${BUILD_PREFIX}" \
+          -D BUILD_TESTING=OFF \
+          -D BUILD_STATIC_LIBS=OFF \
+          -D HDF5_BUILD_EXAMPLES=OFF \
+          -D HDF5_BUILD_TOOLS=OFF \
+          -D HDF5_BUILD_UTILS=OFF \
+          -D HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO \
+          -D HDF5_ENABLE_ZLIB_SUPPORT=ON \
+          -D HDF5_ENABLE_SZIP_SUPPORT=ON
+
+      make -C build -j "$(nproc)"
+      make -C build install
     popd
 
     # Needed by h5ls to find libhdf5.so.310
@@ -99,7 +113,7 @@ build_netcdf() {
     NETCDF_BLD=netcdf-build
 
     wget https://github.com/Unidata/netcdf-c/archive/refs/tags/v${NETCDF_VERSION}.tar.gz
-    tar -xzvf v${NETCDF_VERSION}.tar.gz
+    tar zxf v${NETCDF_VERSION}.tar.gz
 
       cmake ${NETCDF_SRC} -B ${NETCDF_BLD} \
           -DENABLE_NETCDF4=on \
